@@ -1,0 +1,80 @@
+name: Build Flutter APKs
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Files/Flutter/**'
+      - '.github/workflows/build-apks.yml'
+  workflow_dispatch:
+
+jobs:
+  build-rider:
+    name: Build Rider APK
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: 'stable'
+      
+      - name: Install dependencies
+        working-directory: Files/Flutter/Rider
+        run: flutter pub get
+      
+      - name: Build APK
+        working-directory: Files/Flutter/Rider
+        run: flutter build apk --release
+      
+      - name: Upload Rider APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: rider-apk
+          path: Files/Flutter/Rider/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+  build-driver:
+    name: Build Driver APK
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: 'stable'
+      
+      - name: Install dependencies
+        working-directory: Files/Flutter/Driver
+        run: flutter pub get
+      
+      - name: Build APK
+        working-directory: Files/Flutter/Driver
+        run: flutter build apk --release
+      
+      - name: Upload Driver APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: driver-apk
+          path: Files/Flutter/Driver/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
