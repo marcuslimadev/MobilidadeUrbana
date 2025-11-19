@@ -1,0 +1,1 @@
+For version 1.5, there’s no need to update the web version. You only need to update the Flutter code.
