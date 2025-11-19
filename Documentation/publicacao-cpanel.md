@@ -17,66 +17,119 @@ Guia rápido em português para colocar o backend Laravel (pasta `Files/Laravel`
 
 ## 2. Enviar os arquivos para o cPanel
 
-- **Opção Git (recomendada):** No cPanel, abra **Git Version Control**, informe a URL do repositório e clone em `/home/SEU_USUARIO/mobilidade`.
-- **Opção upload:** No **File Manager**, envie `mobilidade-urbana.zip`, extraia e verifique se as pastas `Files/`, `Documentation/`, `Updates/` ficaram completas.
+### Opção A: Git Version Control (recomendada)
+
+1. No cPanel, abra **Git Version Control**
+2. Clique em **Create**
+3. Preencha:
+   - **Clonar URL:** `https://github.com/marcuslimadev/MobilidadeUrbana.git`
+   - **Caminho do Repositório:** `/home/mobilidade` (ou `/home/SEU_USUARIO/mobilidade`)
+   - **Nome do Repositório:** (deixe vazio - será preenchido automaticamente)
+4. Clique em **Criar** e aguarde o clone
+
+### Opção B: Upload ZIP
+
+No **File Manager**, envie `mobilidade-urbana.zip`, extraia e verifique se as pastas `Files/`, `Documentation/`, `Updates/` ficaram completas.
 
 ## 3. Criar banco de dados MySQL
 
-1. Acesse **MySQL® Databases**.
-2. Crie o banco (ex.: `cpuser_moburb`).
-3. Crie o usuário (ex.: `cpuser_app`) com senha forte.
-4. Dê **All Privileges** para o usuário neste banco.
-5. No **phpMyAdmin**, importe `install/database.sql` (ou seu dump atualizado).
+1. Acesse **MySQL® Databases**
+2. Em **Criar Novo Banco de Dados**:
+   - Nome: `moburb` (ou `mobilidade_urbana`)
+   - Clique em **Criar Banco de Dados**
+3. Em **Adicionar Novo Usuário**:
+   - Nome de usuário: `app`
+   - Senha: (gere uma senha forte)
+   - Clique em **Criar Usuário**
+4. Em **Adicionar Usuário ao Banco de Dados**:
+   - Usuário: selecione o criado (`app`)
+   - Banco de dados: selecione o criado (`moburb`)
+   - Clique em **Adicionar**
+5. Marque **TODOS OS PRIVILÉGIOS** → **Fazer Mudanças**
+6. No **phpMyAdmin**, selecione o banco e importe `Files/Laravel/install/database.sql`
 
-Anote para o `.env`:
+Anote as credenciais (irá precisar no .env):
 ```
 DB_HOST=localhost
-DB_DATABASE=cpuser_moburb
-DB_USERNAME=cpuser_app
-DB_PASSWORD=<senha>
+DB_DATABASE=SEU_USUARIO_moburb
+DB_USERNAME=SEU_USUARIO_app
+DB_PASSWORD=<senha_que_você_criou>
 ```
+
+> **Importante:** O cPanel adiciona o prefixo do seu usuário automaticamente (ex: `cpuser_moburb`).
 
 ## 4. Definir o diretório público
 
-- Aponte o domínio/subdomínio para `/home/SEU_USUARIO/mobilidade/Files/Laravel`.
-- O `.htaccess` dessa pasta já direciona tudo para `index.php`, que carrega `core/bootstrap/app.php`.
+1. No cPanel, vá em **Domains** → selecione seu domínio
+2. Em **Document Root**, configure:
+   - **Caminho:** `/home/mobilidade/Files/Laravel` (ajuste `mobilidade` se usou caminho diferente)
+3. Salve as alterações
+4. O `.htaccess` em `Files/Laravel/` já direciona para `index.php`, que carrega `core/bootstrap/app.php`
+
+> **Nota:** Se clonou em `/home/SEU_USUARIO/mobilidade`, use `/home/SEU_USUARIO/mobilidade/Files/Laravel`
 
 ## 5. Configurar `.env`
 
-Edite `/home/SEU_USUARIO/mobilidade/Files/Laravel/core/.env` (via SSH ou editor do cPanel) com informações de produção:
-```
+1. No **File Manager**, navegue até `/home/mobilidade/Files/Laravel/core/`
+2. Localize o arquivo `.env.example` (se não existir `.env`)
+3. Copie `.env.example` para `.env` (botão direito → Copy → renomeie para `.env`)
+4. Clique com botão direito em `.env` → **Edit**
+5. Atualize com as informações de produção:
+
+```env
 APP_NAME="Mobilidade Urbana"
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://app.seudominio.com
+APP_URL=https://seudominio.com
 APP_LOCALE=pt_BR
+APP_FALLBACK_LOCALE=pt_BR
+APP_TIMEZONE=America/Sao_Paulo
 
 DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
+DB_HOST=localhost
 DB_PORT=3306
-DB_DATABASE=cpuser_moburb
-DB_USERNAME=cpuser_app
-DB_PASSWORD=<senha>
+DB_DATABASE=SEU_USUARIO_moburb
+DB_USERNAME=SEU_USUARIO_app
+DB_PASSWORD=<senha_forte_aqui>
 
 CACHE_DRIVER=file
 QUEUE_CONNECTION=database
 SESSION_DRIVER=file
+SESSION_LIFETIME=120
+FILESYSTEM_DISK=public
 ```
-Complete também MAIL_*, PUSHER_* e demais integrações, se necessário.
+
+6. **Salve** o arquivo (Ctrl+S ou botão Save)
+
+> **Dica:** Use o **Terminal** do cPanel (se disponível) ou SSH para gerar APP_KEY depois.
 
 ## 6. Instalar dependências no servidor
 
-Via SSH:
+### Via Terminal do cPanel ou SSH:
+
 ```bash
-cd /home/SEU_USUARIO/mobilidade/Files/Laravel/core
+cd /home/mobilidade/Files/Laravel/core
 composer install --no-dev --optimize-autoloader
-php artisan key:generate        # apenas se APP_KEY estiver vazio
-php artisan migrate --force     # atualiza estrutura do banco
-php artisan db:seed --force     # opcional: dados de demonstração
-php artisan storage:link        # cria symlink para uploads
-php artisan optimize            # cache de config/rotas
+php artisan key:generate        # gera APP_KEY automaticamente
+php artisan migrate --force     # cria/atualiza tabelas do banco
+php artisan storage:link        # cria symlink para uploads públicos
+php artisan optimize            # cache de config/rotas/views
 ```
-Se não tiver Composer no servidor, suba a pasta `vendor/` gerada localmente.
+
+### Sem acesso SSH?
+
+1. No computador local, rode:
+   ```powershell
+   cd c:\Projetos\MobilidadeUrbana\Files\Laravel\core
+   composer install --no-dev --optimize-autoloader
+   ```
+2. Compacte a pasta `vendor/` gerada
+3. Envie via File Manager para `/home/mobilidade/Files/Laravel/core/vendor/`
+4. No File Manager do cPanel, crie o arquivo `.env` manualmente e adicione:
+   ```
+   APP_KEY=base64:GERAR_KEY_AQUI
+   ```
+5. Para gerar APP_KEY sem terminal, use: https://generate-random.org/laravel-key-generator
 
 ## 7. Cron e filas
 
