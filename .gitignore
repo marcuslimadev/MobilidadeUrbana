@@ -48,5 +48,11 @@ composer-error.log
 *.log
 *.tmp
 
+# Private deployment documentation with credentials
+DEPLOYMENT-CREDENTIALS.md
+deployment-credentials.txt
+vps-config.md
+server-passwords.txt
+
 # Keep placeholder .gitignore files tracked
 !**/.gitignore
