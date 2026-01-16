@@ -1,5 +1,5 @@
 class UrlContainer {
-  static const String domainUrl = 'https://understanding-mauve-penguin.177-136-254-68.cpanel.site'; //YOUR WEBSITE DOMAIN URL HERE
+  static const String domainUrl = 'http://72.62.137.32:8080'; //YOUR WEBSITE DOMAIN URL HERE
 
   static const String baseUrl = '$domainUrl/api/';
   static const String dashBoardEndPoint = 'dashboard';
